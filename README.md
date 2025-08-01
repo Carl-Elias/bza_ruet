@@ -4,6 +4,22 @@ This is a React.js website for the Bogura Zilla Association (BZA) RUET - a distr
 
 🚀 **Live Website**: https://bza-ruet-alumni-477a6.web.app
 
+## 📋 Quick Links
+
+- **🔄 Development Workflow**: See [WORKFLOW.md](./WORKFLOW.md) for complete deployment guide
+- **🛠️ Development Setup**: See [DEVELOPMENT.md](./DEVELOPMENT.md) for setup instructions  
+- **🔥 Firebase Setup**: See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for Firebase configuration
+
+## ⚡ Quick Start
+
+```bash
+# Development
+npm run dev
+
+# Deploy to production
+./deploy.sh
+```
+
 ## 🌟 Features
 
 ### Core Functionality
