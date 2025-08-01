@@ -1,6 +1,8 @@
-# BZA RUET - Bogura Zilla Association Website
+# BZA RUET Website
 
-A modern React.js website for the Bogura Zilla Association at Rajshahi University of Engineering and Technology (RUET). This platform connects students and alumni from Bogura district, fostering community engagement and professional networking.
+This is a React.js website for the Bogura Zilla Association (BZA) RUET - a district association connecting alumni and current students from Bogura, Bangladesh studying at Rajshahi University of Engineering and Technology.
+
+🚀 **Live Website**: https://bza-ruet-alumni-477a6.web.app
 
 ## 🌟 Features
 
