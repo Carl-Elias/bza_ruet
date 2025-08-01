@@ -3,24 +3,28 @@
 ## 🚀 Quick Start
 
 ### Development Server
+
 ```bash
 npm run dev
 ```
+
 Opens at: http://localhost:5173
 
 ### Deploy to Production
+
 ```bash
 ./deploy.sh
 ```
+
 Deploys to: https://bza-ruet-alumni-477a6.web.app
 
 ## 📋 Available Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `./deploy.sh` | Build and deploy to Firebase |
+| Command          | Description                      |
+| ---------------- | -------------------------------- |
+| `npm run dev`    | Start development server         |
+| `npm run build`  | Build for production             |
+| `./deploy.sh`    | Build and deploy to Firebase     |
 | `firebase serve` | Preview production build locally |
 
 ## 🌐 Live URLs

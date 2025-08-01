@@ -3,6 +3,7 @@
 ## 🔄 Development & Deployment Workflow
 
 ### For Testing/Development:
+
 ```bash
 npm run dev          # Test locally first
 git add .
@@ -11,6 +12,7 @@ git push            # Save progress to GitHub (but don't deploy yet)
 ```
 
 ### For Production Updates:
+
 ```bash
 npm run dev          # Test locally
 git add .
@@ -20,6 +22,7 @@ git push            # Save to GitHub
 ```
 
 ### For Quick Fixes:
+
 ```bash
 # Edit files
 ./deploy.sh         # Deploy immediately
@@ -31,15 +34,15 @@ git push           # Save to GitHub
 
 ## 📋 Available Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server at http://localhost:5173 |
-| `npm run build` | Build for production |
-| `./deploy.sh` | Build and deploy to Firebase Hosting |
-| `firebase serve` | Preview production build locally |
-| `git add .` | Stage all changes |
-| `git commit -m "message"` | Commit changes with message |
-| `git push` | Push to GitHub repository |
+| Command                   | Description                                       |
+| ------------------------- | ------------------------------------------------- |
+| `npm run dev`             | Start development server at http://localhost:5173 |
+| `npm run build`           | Build for production                              |
+| `./deploy.sh`             | Build and deploy to Firebase Hosting              |
+| `firebase serve`          | Preview production build locally                  |
+| `git add .`               | Stage all changes                                 |
+| `git commit -m "message"` | Commit changes with message                       |
+| `git push`                | Push to GitHub repository                         |
 
 ## 🌐 Important URLs
 
@@ -57,22 +60,26 @@ git push           # Save to GitHub
 ## 💡 Workflow Best Practices
 
 ### 1. Always Test Locally First
+
 ```bash
 npm run dev  # Make sure everything works locally
 ```
 
 ### 2. Separate Development from Production
+
 - **GitHub** = Code backup and version control
 - **Firebase** = Live website that users see
 - **You control when each gets updated**
 
 ### 3. Commit Messages Guidelines
+
 - `"Add feature: alumni search functionality"`
 - `"Fix: registration form validation"`
 - `"Update: improve admin dashboard UI"`
 - `"WIP: working on new feature"` (for work in progress)
 
 ### 4. Deploy Strategy
+
 - **Test locally** → **Push to GitHub** → **Deploy to Firebase**
 - This ensures your live website always works
 - GitHub keeps your code history safe
@@ -80,6 +87,7 @@ npm run dev  # Make sure everything works locally
 ## 🛠️ Troubleshooting
 
 ### If deployment fails:
+
 ```bash
 firebase login  # Make sure you're logged in
 npm run build   # Test build locally first
@@ -87,12 +95,14 @@ npm run build   # Test build locally first
 ```
 
 ### If local development issues:
+
 ```bash
 npm install     # Reinstall dependencies
 npm run dev     # Start development server
 ```
 
 ### If Firebase issues:
+
 - Check Firebase Console for errors
 - Verify `.env` file has correct configuration
 - Ensure you're logged into correct Firebase account
@@ -100,6 +110,7 @@ npm run dev     # Start development server
 ## ⚡ Quick Reference
 
 ### Daily Development:
+
 1. `npm run dev` - Start working
 2. Make changes
 3. Test in browser
@@ -107,6 +118,7 @@ npm run dev     # Start development server
 5. When ready for users: `./deploy.sh`
 
 ### Weekly Deployment:
+
 1. Test all features locally
 2. Update GitHub with all changes
 3. Deploy to production for users

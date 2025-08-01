@@ -98,7 +98,7 @@ const Alumni = () => {
                   <Icon size={24} className="stat-icon" />
                   <div>
                     <div className="stat-value">{stat.value}</div>
-                    <div className="stat-label">{stat.label}</div>
+                    <div className="stat-label_modify">{stat.label}</div>
                   </div>
                 </div>
               );
