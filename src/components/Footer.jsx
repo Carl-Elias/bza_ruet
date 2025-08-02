@@ -51,7 +51,7 @@ const Footer = () => {
               </div>
               <div className="contact-item">
                 <Mail size={16} />
-                <span>info@bzaruet.org</span>
+                <span>bogurazillaassociation@gmail.com</span>
               </div>
               <div className="contact-item">
                 <Users size={16} />
@@ -63,7 +63,11 @@ const Footer = () => {
           <div className="footer-section">
             <h4 className="footer-subtitle">Follow Us</h4>
             <div className="social-links">
-              <a href="#" className="social-link" aria-label="Facebook">
+              <a
+                href="https://www.facebook.com/profile.php?id=100064880670274"
+                className="social-link"
+                aria-label="Facebook"
+              >
                 <Facebook size={20} />
               </a>
               <a href="#" className="social-link" aria-label="Email">

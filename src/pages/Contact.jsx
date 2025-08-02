@@ -1,5 +1,6 @@
 import { Mail, Phone, MapPin, Users, Send } from "lucide-react";
 import { useState } from "react";
+import emailjs from "emailjs-com";
 import "./Contact.css";
 
 const Contact = () => {
@@ -11,6 +12,10 @@ const Contact = () => {
     category: "general",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+  const [submittedData, setSubmittedData] = useState(null);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -18,31 +23,73 @@ const Contact = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission here
-    alert("Thank you for your message! We will get back to you soon.");
-    setFormData({
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-      category: "general",
-    });
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    // Create mailto link with proper encoding
+    const subject = `Contact from ${formData.name} - ${formData.subject}`;
+    const body = `Hello BZA Team,
+
+I would like to contact you regarding: ${formData.category}
+
+From: ${formData.name}
+Email: ${formData.email}
+
+Message:
+${formData.message}
+
+Best regards,
+${formData.name}`;
+
+    const mailtoLink = `mailto:bogurazillaassociation@gmail.com?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+
+    try {
+      // Store form data for preview before clearing
+      setSubmittedData({ ...formData });
+
+      // Try to open mailto link
+      const link = document.createElement("a");
+      link.href = mailtoLink;
+      link.click();
+
+      // Alternative: try window.open
+      // window.open(mailtoLink, '_blank');
+
+      // Show success message after a short delay
+      setTimeout(() => {
+        setSubmitStatus("success");
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          message: "",
+          category: "general",
+        });
+        setIsSubmitting(false);
+      }, 1500);
+    } catch (error) {
+      console.error("Error opening email client:", error);
+      setSubmitStatus("error");
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
     {
       icon: Mail,
       title: "Email",
-      detail: "info@bzaruet.org",
-      link: "mailto:info@bzaruet.org",
+      detail: "bogurazillaassociation@gmail.com",
+      link: "mailto:bogurazillaassociation@gmail.com",
     },
     {
       icon: Phone,
       title: "Phone",
-      detail: "+880 1xxx-xxxxxx",
-      link: "tel:+8801xxxxxxxxx",
+      detail: "+880 1934207178",
+      link: "tel:+8801934207178",
     },
     {
       icon: MapPin,
@@ -53,7 +100,7 @@ const Contact = () => {
     {
       icon: Users,
       title: "Office",
-      detail: "Student Activity Center, RUET",
+      detail: "Student Residential Hall, RUET",
       link: null,
     },
   ];
@@ -108,18 +155,24 @@ const Contact = () => {
               <div className="committee-members">
                 <div className="committee-member">
                   <h4>President</h4>
-                  <p>Md. Ashraful Islam</p>
-                  <small>ashraf.president@bzaruet.org</small>
+                  <p style={{ whiteSpace: "nowrap" }}>Md. Shakibul Hasan</p>
+                  <small>
+                    <a href="tel:+8801934207178">01934207178</a>
+                  </small>
                 </div>
                 <div className="committee-member">
                   <h4>General Secretary</h4>
-                  <p>Fatima Rahman</p>
-                  <small>fatima.secretary@bzaruet.org</small>
+                  <p style={{ whiteSpace: "nowrap" }}>Alamin Islam Roky</p>
+                  <small>
+                    <a href="tel:+8801749278539">01749278539</a>
+                  </small>
                 </div>
                 <div className="committee-member">
                   <h4>Treasurer</h4>
-                  <p>Kamrul Hassan</p>
-                  <small>kamrul.treasurer@bzaruet.org</small>
+                  <p style={{ whiteSpace: "nowrap" }}>Md. Tauhedur Rahman</p>
+                  <small>
+                    <a href="tel:+8801567977852">01567977852</a>
+                  </small>
                 </div>
               </div>
             </div>
@@ -199,10 +252,60 @@ const Contact = () => {
                 ></textarea>
               </div>
 
-              <button type="submit" className="btn btn-primary submit-btn">
+              <button
+                type="submit"
+                className="btn btn-primary submit-btn"
+                disabled={isSubmitting}
+              >
                 <Send size={20} />
-                Send Message
+                {isSubmitting ? "Sending..." : "Send Message"}
               </button>
+
+              {submitStatus === "success" && submittedData && (
+                <div className="submit-message success">
+                  ✅ Email client should have opened! If it didn't, please copy
+                  this message and email us:
+                  <div className="message-preview">
+                    <strong>To:</strong> bogurazillaassociation@gmail.com
+                    <br />
+                    <strong>Subject:</strong> Contact from {submittedData.name}{" "}
+                    - {submittedData.subject}
+                    <br />
+                    <strong>Message:</strong>
+                    <br />
+                    Hello BZA Team,
+                    <br />
+                    <br />I would like to contact you regarding:{" "}
+                    {submittedData.category}
+                    <br />
+                    <br />
+                    From: {submittedData.name}
+                    <br />
+                    Email: {submittedData.email}
+                    <br />
+                    <br />
+                    Message:
+                    <br />
+                    {submittedData.message}
+                    <br />
+                    <br />
+                    Best regards,
+                    <br />
+                    {submittedData.name}
+                  </div>
+                  <small>Or call: +880 1934207178</small>
+                </div>
+              )}
+
+              {submitStatus === "error" && (
+                <div className="submit-message error">
+                  ❌ Unable to open email client. Please contact us directly:
+                  <br />
+                  <strong>Email:</strong> bogurazillaassociation@gmail.com
+                  <br />
+                  <strong>Phone:</strong> +880 1934207178
+                </div>
+              )}
             </form>
           </div>
         </div>
