@@ -70,7 +70,7 @@ const Footer = () => {
               >
                 <Facebook size={20} />
               </a>
-              <a href="#" className="social-link" aria-label="Email">
+              <a href="mailto:bogurazillaassociation@gmail.com" className="social-link" aria-label="Email">
                 <Mail size={20} />
               </a>
             </div>

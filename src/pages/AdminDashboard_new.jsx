@@ -19,12 +19,7 @@ import {
   Save,
   X,
 } from "lucide-react";
-import {
-  alumniService,
-  statsService,
-  eventsService,
-  announcementsService,
-} from "../services/firebase";
+import { alumniService, statsService } from "../services/firebase";
 import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
@@ -102,41 +97,57 @@ const AdminDashboard = () => {
   };
 
   const loadEvents = async () => {
-    try {
-      console.log("Loading events from Firebase...");
-      const result = await eventsService.getAllEvents();
-
-      if (result.success) {
-        console.log("Events loaded successfully:", result.data);
-        setEvents(result.data);
-      } else {
-        console.error("Failed to load events:", result.error);
-        // Set empty array if no events or error
-        setEvents([]);
-      }
-    } catch (error) {
-      console.error("Error loading events:", error);
-      setEvents([]);
-    }
+    // Mock events data for now
+    setEvents([
+      {
+        id: 1,
+        title: "Annual Alumni Meetup 2025",
+        description: "Join us for our annual alumni gathering",
+        date: "2025-03-15",
+        time: "10:00 AM",
+        location: "RUET Campus",
+        category: "social",
+        status: "upcoming",
+        createdAt: new Date(),
+      },
+      {
+        id: 2,
+        title: "Career Development Workshop",
+        description: "Professional development session for alumni",
+        date: "2025-02-20",
+        time: "2:00 PM",
+        location: "Online",
+        category: "educational",
+        status: "upcoming",
+        createdAt: new Date(),
+      },
+    ]);
   };
 
   const loadAnnouncements = async () => {
-    try {
-      console.log("Loading announcements from Firebase...");
-      const result = await announcementsService.getAllAnnouncements();
-
-      if (result.success) {
-        console.log("Announcements loaded successfully:", result.data);
-        setAnnouncements(result.data);
-      } else {
-        console.error("Failed to load announcements:", result.error);
-        // Set empty array if no announcements or error
-        setAnnouncements([]);
-      }
-    } catch (error) {
-      console.error("Error loading announcements:", error);
-      setAnnouncements([]);
-    }
+    // Mock announcements data for now
+    setAnnouncements([
+      {
+        id: 1,
+        title: "New Alumni Registration Process",
+        content:
+          "We have updated our alumni registration process to make it more streamlined...",
+        priority: "high",
+        status: "active",
+        category: "general",
+        createdAt: new Date(),
+      },
+      {
+        id: 2,
+        title: "Upcoming Cultural Program",
+        content:
+          "BZA is organizing a cultural program next month. Stay tuned for more details...",
+        priority: "normal",
+        status: "active",
+        category: "events",
+        createdAt: new Date(),
+      },
+    ]);
   };
 
   const handleStatusUpdate = async (alumniId, newStatus, note = "") => {
@@ -172,118 +183,66 @@ const AdminDashboard = () => {
   };
 
   // Event handlers
-  const handleEventSubmit = async (e) => {
+  const handleEventSubmit = (e) => {
     e.preventDefault();
+    const newEvent = {
+      id: editingEvent ? editingEvent.id : Date.now(),
+      ...eventForm,
+      createdAt: editingEvent ? editingEvent.createdAt : new Date(),
+      updatedAt: new Date(),
+    };
 
-    try {
-      if (editingEvent) {
-        // Update existing event
-        console.log("Updating event:", editingEvent.id);
-        const result = await eventsService.updateEvent(
-          editingEvent.id,
-          eventForm
-        );
-
-        if (result.success) {
-          console.log("Event updated successfully");
-          // Reload events to get updated data
-          await loadEvents();
-        } else {
-          console.error("Failed to update event:", result.error);
-          alert("Failed to update event. Please try again.");
-          return;
-        }
-      } else {
-        // Create new event
-        console.log("Creating new event:", eventForm);
-        const result = await eventsService.createEvent(eventForm);
-
-        if (result.success) {
-          console.log("Event created successfully with ID:", result.id);
-          // Reload events to include the new event
-          await loadEvents();
-        } else {
-          console.error("Failed to create event:", result.error);
-          alert("Failed to create event. Please try again.");
-          return;
-        }
-      }
-
-      // Reset form and close modal
-      setShowEventForm(false);
-      setEditingEvent(null);
-      setEventForm({
-        title: "",
-        description: "",
-        date: "",
-        time: "",
-        location: "",
-        category: "general",
-        status: "upcoming",
-      });
-    } catch (error) {
-      console.error("Error handling event submit:", error);
-      alert("An error occurred. Please try again.");
+    if (editingEvent) {
+      setEvents(
+        events.map((event) => (event.id === editingEvent.id ? newEvent : event))
+      );
+    } else {
+      setEvents([newEvent, ...events]);
     }
+
+    setShowEventForm(false);
+    setEditingEvent(null);
+    setEventForm({
+      title: "",
+      description: "",
+      date: "",
+      time: "",
+      location: "",
+      category: "general",
+      status: "upcoming",
+    });
   };
 
-  const handleAnnouncementSubmit = async (e) => {
+  const handleAnnouncementSubmit = (e) => {
     e.preventDefault();
+    const newAnnouncement = {
+      id: editingAnnouncement ? editingAnnouncement.id : Date.now(),
+      ...announcementForm,
+      createdAt: editingAnnouncement
+        ? editingAnnouncement.createdAt
+        : new Date(),
+      updatedAt: new Date(),
+    };
 
-    try {
-      if (editingAnnouncement) {
-        // Update existing announcement
-        console.log("Updating announcement:", editingAnnouncement.id);
-        const result = await announcementsService.updateAnnouncement(
-          editingAnnouncement.id,
-          announcementForm
-        );
-
-        if (result.success) {
-          console.log("Announcement updated successfully");
-          // Reload announcements to get updated data
-          await loadAnnouncements();
-        } else {
-          console.error("Failed to update announcement:", result.error);
-          alert("Failed to update announcement. Please try again.");
-          return;
-        }
-      } else {
-        // Create new announcement
-        console.log("Creating new announcement:", announcementForm);
-        const announcementData = {
-          ...announcementForm,
-          author: "BZA Admin", // Add default author
-        };
-        const result = await announcementsService.createAnnouncement(
-          announcementData
-        );
-
-        if (result.success) {
-          console.log("Announcement created successfully with ID:", result.id);
-          // Reload announcements to include the new announcement
-          await loadAnnouncements();
-        } else {
-          console.error("Failed to create announcement:", result.error);
-          alert("Failed to create announcement. Please try again.");
-          return;
-        }
-      }
-
-      // Reset form and close modal
-      setShowAnnouncementForm(false);
-      setEditingAnnouncement(null);
-      setAnnouncementForm({
-        title: "",
-        content: "",
-        priority: "normal",
-        status: "active",
-        category: "general",
-      });
-    } catch (error) {
-      console.error("Error handling announcement submit:", error);
-      alert("An error occurred. Please try again.");
+    if (editingAnnouncement) {
+      setAnnouncements(
+        announcements.map((ann) =>
+          ann.id === editingAnnouncement.id ? newAnnouncement : ann
+        )
+      );
+    } else {
+      setAnnouncements([newAnnouncement, ...announcements]);
     }
+
+    setShowAnnouncementForm(false);
+    setEditingAnnouncement(null);
+    setAnnouncementForm({
+      title: "",
+      content: "",
+      priority: "normal",
+      status: "active",
+      category: "general",
+    });
   };
 
   const filteredAlumni = alumni.filter(
@@ -594,29 +553,9 @@ const AdminDashboard = () => {
                     <Edit size={16} />
                   </button>
                   <button
-                    onClick={async () => {
+                    onClick={() => {
                       if (window.confirm("Delete this event?")) {
-                        try {
-                          console.log("Deleting event:", event.id);
-                          const result = await eventsService.deleteEvent(
-                            event.id
-                          );
-
-                          if (result.success) {
-                            console.log("Event deleted successfully");
-                            // Reload events to refresh the list
-                            await loadEvents();
-                          } else {
-                            console.error(
-                              "Failed to delete event:",
-                              result.error
-                            );
-                            alert("Failed to delete event. Please try again.");
-                          }
-                        } catch (error) {
-                          console.error("Error deleting event:", error);
-                          alert("An error occurred while deleting the event.");
-                        }
+                        setEvents(events.filter((e) => e.id !== event.id));
                       }
                     }}
                     className="delete-btn"
@@ -678,37 +617,11 @@ const AdminDashboard = () => {
                     <Edit size={16} />
                   </button>
                   <button
-                    onClick={async () => {
+                    onClick={() => {
                       if (window.confirm("Delete this announcement?")) {
-                        try {
-                          console.log(
-                            "Deleting announcement:",
-                            announcement.id
-                          );
-                          const result =
-                            await announcementsService.deleteAnnouncement(
-                              announcement.id
-                            );
-
-                          if (result.success) {
-                            console.log("Announcement deleted successfully");
-                            // Reload announcements to refresh the list
-                            await loadAnnouncements();
-                          } else {
-                            console.error(
-                              "Failed to delete announcement:",
-                              result.error
-                            );
-                            alert(
-                              "Failed to delete announcement. Please try again."
-                            );
-                          }
-                        } catch (error) {
-                          console.error("Error deleting announcement:", error);
-                          alert(
-                            "An error occurred while deleting the announcement."
-                          );
-                        }
+                        setAnnouncements(
+                          announcements.filter((a) => a.id !== announcement.id)
+                        );
                       }
                     }}
                     className="delete-btn"
@@ -903,7 +816,7 @@ const AdminDashboard = () => {
             className="announcement-form"
           >
             <div className="form-group">
-              <label>📝 Announcement Title *</label>
+              <label>Announcement Title *</label>
               <input
                 type="text"
                 value={announcementForm.title}
@@ -913,13 +826,12 @@ const AdminDashboard = () => {
                     title: e.target.value,
                   })
                 }
-                placeholder="Enter a clear and descriptive title..."
                 required
               />
             </div>
 
             <div className="form-group">
-              <label>📄 Content *</label>
+              <label>Content *</label>
               <textarea
                 value={announcementForm.content}
                 onChange={(e) =>
@@ -929,14 +841,13 @@ const AdminDashboard = () => {
                   })
                 }
                 rows="6"
-                placeholder="Write your announcement content here. Be clear and concise..."
                 required
               />
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label>⚡ Priority</label>
+                <label>Priority</label>
                 <select
                   value={announcementForm.priority}
                   onChange={(e) =>
@@ -946,14 +857,14 @@ const AdminDashboard = () => {
                     })
                   }
                 >
-                  <option value="low">🟢 Low Priority</option>
-                  <option value="normal">🟡 Normal Priority</option>
-                  <option value="high">🟠 High Priority</option>
-                  <option value="urgent">🔴 Urgent Priority</option>
+                  <option value="low">Low</option>
+                  <option value="normal">Normal</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
                 </select>
               </div>
               <div className="form-group">
-                <label>📊 Status</label>
+                <label>Status</label>
                 <select
                   value={announcementForm.status}
                   onChange={(e) =>
@@ -963,15 +874,15 @@ const AdminDashboard = () => {
                     })
                   }
                 >
-                  <option value="active">✅ Active</option>
-                  <option value="draft">📝 Draft</option>
-                  <option value="archived">📦 Archived</option>
+                  <option value="active">Active</option>
+                  <option value="draft">Draft</option>
+                  <option value="archived">Archived</option>
                 </select>
               </div>
             </div>
 
             <div className="form-group">
-              <label>🏷️ Category</label>
+              <label>Category</label>
               <select
                 value={announcementForm.category}
                 onChange={(e) =>
@@ -981,11 +892,11 @@ const AdminDashboard = () => {
                   })
                 }
               >
-                <option value="general">📢 General</option>
-                <option value="events">🎉 Events</option>
-                <option value="academic">🎓 Academic</option>
-                <option value="administrative">🏢 Administrative</option>
-                <option value="urgent">⚠️ Urgent</option>
+                <option value="general">General</option>
+                <option value="events">Events</option>
+                <option value="academic">Academic</option>
+                <option value="administrative">Administrative</option>
+                <option value="urgent">Urgent</option>
               </select>
             </div>
 

@@ -10,6 +10,11 @@ import {
   GraduationCap,
   UserPlus,
   Loader,
+  Eye,
+  X,
+  Phone,
+  Globe,
+  Building,
 } from "lucide-react";
 import { alumniService } from "../services/firebase";
 import "./Alumni.css";
@@ -19,6 +24,8 @@ const Alumni = () => {
   const [selectedBatch, setSelectedBatch] = useState("all");
   const [alumni, setAlumni] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedAlumni, setSelectedAlumni] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   // Load approved alumni data from Firebase
   useEffect(() => {
@@ -50,26 +57,44 @@ const Alumni = () => {
     loadApprovedAlumni();
   }, []);
 
-  const batches = [
-    "all",
-    "2016",
-    "2017",
-    "2018",
-    "2019",
-    "2020",
-    "2021",
-    "2022",
-  ];
+  // Generate dynamic batch list from actual alumni data
+  const availableBatches = [...new Set(alumni.map((person) => person.batch))]
+    .filter((batch) => batch) // Remove any null/undefined batches
+    .sort((a, b) => parseInt(a) - parseInt(b)); // Sort chronologically
 
-  const filteredAlumni = alumni.filter((person) => {
-    const matchesSearch =
-      person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      person.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      person.currentPosition.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesBatch =
-      selectedBatch === "all" || person.batch === selectedBatch;
-    return matchesSearch && matchesBatch;
-  });
+  const batches = ["all", ...availableBatches];
+
+  const filteredAlumni = alumni
+    .filter((person) => {
+      const matchesSearch =
+        person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        person.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        person.currentPosition.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesBatch =
+        selectedBatch === "all" || person.batch === selectedBatch;
+      return matchesSearch && matchesBatch;
+    })
+    .sort((a, b) => {
+      // Primary sort: by batch (chronologically, oldest first)
+      const batchA = parseInt(a.batch) || 0;
+      const batchB = parseInt(b.batch) || 0;
+      if (batchA !== batchB) {
+        return batchA - batchB;
+      }
+      // Secondary sort: by name (alphabetically) within same batch
+      return a.name.localeCompare(b.name);
+    });
+
+  // Handle modal functions
+  const openModal = (alumniData) => {
+    setSelectedAlumni(alumniData);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedAlumni(null);
+  };
 
   const stats = [
     { label: "Total Alumni", value: "200+", icon: GraduationCap },
@@ -132,7 +157,7 @@ const Alumni = () => {
               className="batch-select"
             >
               <option value="all">All Batches</option>
-              {batches.slice(1).map((batch) => (
+              {availableBatches.map((batch) => (
                 <option key={batch} value={batch}>
                   Batch {batch}
                 </option>
@@ -190,6 +215,14 @@ const Alumni = () => {
                     </div>
 
                     <div className="alumni-actions">
+                      <button
+                        onClick={() => openModal(person)}
+                        className="details-btn"
+                        title="View Details"
+                      >
+                        <Eye size={16} />
+                        Details
+                      </button>
                       <a
                         href={`mailto:${person.email}`}
                         className="contact-btn"
@@ -229,6 +262,179 @@ const Alumni = () => {
           </div>
         </div>
       </section>
+
+      {/* Alumni Details Modal */}
+      {showModal && selectedAlumni && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="alumni-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Alumni Details</h2>
+              <button onClick={closeModal} className="close-btn">
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="modal-content">
+              <div className="alumni-profile">
+                <div className="profile-avatar">
+                  {selectedAlumni.profileImage ? (
+                    <img
+                      src={selectedAlumni.profileImage}
+                      alt={selectedAlumni.name}
+                      className="profile-image-large"
+                    />
+                  ) : (
+                    <Users size={80} />
+                  )}
+                </div>
+
+                <div className="profile-info">
+                  <h3 className="profile-name">{selectedAlumni.name}</h3>
+                  <p className="profile-position">
+                    {selectedAlumni.currentPosition}
+                    {selectedAlumni.company && ` at ${selectedAlumni.company}`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="details-grid">
+                <div className="detail-item">
+                  <div className="detail-icon">
+                    <GraduationCap size={20} />
+                  </div>
+                  <div className="detail-content">
+                    <span className="detail-label">Department</span>
+                    <span className="detail-value">
+                      {selectedAlumni.department}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="detail-item">
+                  <div className="detail-icon">
+                    <Calendar size={20} />
+                  </div>
+                  <div className="detail-content">
+                    <span className="detail-label">Batch</span>
+                    <span className="detail-value">
+                      Batch {selectedAlumni.batch}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="detail-item">
+                  <div className="detail-icon">
+                    <Calendar size={20} />
+                  </div>
+                  <div className="detail-content">
+                    <span className="detail-label">Graduation Year</span>
+                    <span className="detail-value">
+                      {selectedAlumni.graduationYear}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="detail-item">
+                  <div className="detail-icon">
+                    <MapPin size={20} />
+                  </div>
+                  <div className="detail-content">
+                    <span className="detail-label">Work Location</span>
+                    <span className="detail-value">
+                      {selectedAlumni.workLocation ||
+                        selectedAlumni.location ||
+                        "Not specified"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="detail-item">
+                  <div className="detail-icon">
+                    <Mail size={20} />
+                  </div>
+                  <div className="detail-content">
+                    <span className="detail-label">Email</span>
+                    <span className="detail-value">{selectedAlumni.email}</span>
+                  </div>
+                </div>
+
+                {selectedAlumni.phone && (
+                  <div className="detail-item">
+                    <div className="detail-icon">
+                      <Phone size={20} />
+                    </div>
+                    <div className="detail-content">
+                      <span className="detail-label">Phone</span>
+                      <span className="detail-value">
+                        {selectedAlumni.phone}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {selectedAlumni.company && (
+                  <div className="detail-item">
+                    <div className="detail-icon">
+                      <Building size={20} />
+                    </div>
+                    <div className="detail-content">
+                      <span className="detail-label">Company</span>
+                      <span className="detail-value">
+                        {selectedAlumni.company}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {selectedAlumni.website && (
+                  <div className="detail-item">
+                    <div className="detail-icon">
+                      <Globe size={20} />
+                    </div>
+                    <div className="detail-content">
+                      <span className="detail-label">Website</span>
+                      <a
+                        href={selectedAlumni.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="detail-link"
+                      >
+                        {selectedAlumni.website}
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {selectedAlumni.bio && (
+                <div className="bio-section">
+                  <h4>About</h4>
+                  <p>{selectedAlumni.bio}</p>
+                </div>
+              )}
+
+              <div className="modal-actions">
+                <a
+                  href={`mailto:${selectedAlumni.email}`}
+                  className="btn btn-primary"
+                >
+                  <Mail size={16} />
+                  Send Email
+                </a>
+                {selectedAlumni.phone && (
+                  <a
+                    href={`tel:${selectedAlumni.phone}`}
+                    className="btn btn-secondary"
+                  >
+                    <Phone size={16} />
+                    Call
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,70 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, Calendar, Pin, AlertCircle } from "lucide-react";
+import { announcementsService } from "../services/firebase";
 import "./Announcements.css";
 
 const Announcements = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [announcements, setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const announcements = [
-    {
-      id: 1,
-      title: "Registration Open: Annual BZA Reunion 2025",
-      content:
-        "We are excited to announce that registration is now open for our Annual BZA Reunion 2025! Join us on March 15th for a day of networking, cultural activities, and reconnecting with old friends.",
-      date: "2025-01-20",
-      category: "event",
-      priority: "high",
-      author: "BZA Executive Committee",
-    },
-    {
-      id: 2,
-      title: "New Alumni Directory Launch",
-      content:
-        "Our new online alumni directory is now live! Alumni can update their profiles and current students can connect with professionals in their field of interest.",
-      date: "2025-01-18",
-      category: "general",
-      priority: "medium",
-      author: "BZA Tech Team",
-    },
-    {
-      id: 3,
-      title: "Scholarship Opportunity: BZA Merit Award 2025",
-      content:
-        "Applications are now being accepted for the BZA Merit Award 2025. This scholarship is available for current RUET students from Bogura district who demonstrate academic excellence and community involvement.",
-      date: "2025-01-15",
-      category: "academic",
-      priority: "high",
-      author: "BZA Academic Committee",
-    },
-    {
-      id: 4,
-      title: "Cultural Night 2025 - Call for Performers",
-      content:
-        "Calling all talented performers! We are looking for musicians, dancers, and other cultural performers for our upcoming Cultural Night on April 10th. Registration deadline: February 20th.",
-      date: "2025-01-12",
-      category: "cultural",
-      priority: "medium",
-      author: "BZA Cultural Committee",
-    },
-    {
-      id: 5,
-      title: "Monthly Meeting Reminder",
-      content:
-        "Reminder: Our monthly general meeting is scheduled for January 30th at 7:00 PM in the CSE Department seminar room. All members are encouraged to attend.",
-      date: "2025-01-10",
-      category: "meeting",
-      priority: "low",
-      author: "BZA Secretary",
-    },
-  ];
+  // Load announcements from Firebase
+  useEffect(() => {
+    const loadAnnouncements = async () => {
+      try {
+        console.log("Loading announcements for Announcements page...");
+        const result = await announcementsService.getActiveAnnouncements();
+
+        if (result.success) {
+          console.log("Announcements loaded successfully:", result.data);
+          setAnnouncements(result.data);
+        } else {
+          console.error("Failed to load announcements:", result.error);
+          setAnnouncements([]);
+        }
+      } catch (error) {
+        console.error("Error loading announcements:", error);
+        setAnnouncements([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAnnouncements();
+  }, []);
 
   const categories = [
     { value: "all", label: "All Announcements" },
-    { value: "event", label: "Events" },
-    { value: "academic", label: "Academic" },
-    { value: "cultural", label: "Cultural" },
-    { value: "meeting", label: "Meetings" },
     { value: "general", label: "General" },
+    { value: "events", label: "Events" },
+    { value: "academic", label: "Academic" },
+    { value: "administrative", label: "Administrative" },
+    { value: "urgent", label: "Urgent" },
   ];
 
   const filteredAnnouncements = announcements.filter(
@@ -73,7 +48,23 @@ const Announcements = () => {
   );
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
+    if (!dateString) return "Date not available";
+
+    // Handle Firebase Timestamp or regular date
+    let date;
+    if (dateString && typeof dateString.toDate === "function") {
+      date = dateString.toDate();
+    } else if (dateString instanceof Date) {
+      date = dateString;
+    } else {
+      date = new Date(dateString);
+    }
+
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return "Invalid Date";
+    }
+
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -83,17 +74,21 @@ const Announcements = () => {
 
   const getPriorityIcon = (priority) => {
     switch (priority) {
+      case "urgent":
+        return <AlertCircle size={16} className="priority-icon urgent" />;
       case "high":
         return <AlertCircle size={16} className="priority-icon high" />;
-      case "medium":
-        return <Bell size={16} className="priority-icon medium" />;
-      default:
+      case "normal":
+        return <Bell size={16} className="priority-icon normal" />;
+      case "low":
         return <Pin size={16} className="priority-icon low" />;
+      default:
+        return <Bell size={16} className="priority-icon normal" />;
     }
   };
 
   const getPriorityClass = (priority) => {
-    return `announcement-card ${priority}-priority`;
+    return `announcement-card ${priority || "normal"}-priority`;
   };
 
   return (
@@ -131,7 +126,12 @@ const Announcements = () => {
       {/* Announcements List */}
       <section className="announcements-list">
         <div className="announcements-container">
-          {filteredAnnouncements.length > 0 ? (
+          {loading ? (
+            <div className="loading-state">
+              <div className="loading-spinner"></div>
+              <p>Loading announcements...</p>
+            </div>
+          ) : filteredAnnouncements.length > 0 ? (
             <div className="announcements-grid">
               {filteredAnnouncements.map((announcement) => (
                 <div
@@ -151,7 +151,7 @@ const Announcements = () => {
                     </div>
                     <div className="announcement-date">
                       <Calendar size={16} />
-                      {formatDate(announcement.date)}
+                      {formatDate(announcement.createdAt)}
                     </div>
                   </div>
 
@@ -159,7 +159,9 @@ const Announcements = () => {
                     <h3 className="announcement-title">{announcement.title}</h3>
                     <p className="announcement-text">{announcement.content}</p>
                     <div className="announcement-author">
-                      <small>Posted by: {announcement.author}</small>
+                      <small>
+                        Posted by: {announcement.author || "BZA Admin"}
+                      </small>
                     </div>
                   </div>
                 </div>
