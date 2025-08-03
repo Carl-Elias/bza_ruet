@@ -67,11 +67,13 @@ const AlumniRegister = () => {
     "Mechatronics Engineering",
     "Glass & Ceramic Engineering",
     "Urban & Regional Planning",
+    "Building Engineering & Construction Management",
     "Architecture",
     "Mathematics",
     "Physics",
     "Chemistry",
-    "Statistics",
+    "Electronics & Telecommunication Engineering",
+    "Electrical & Computer Engineering",
     "Humanities",
   ];
 
@@ -272,7 +274,7 @@ const AlumniRegister = () => {
 
             <div className="form-group">
               <label htmlFor="profileImage" className="form-label">
-                Profile Photo
+                Profile Photo ( Your profile photo must be less than 1MB )
               </label>
               <div className="image-upload">
                 <input
@@ -306,7 +308,7 @@ const AlumniRegister = () => {
             <div className="form-grid">
               <div className="form-group">
                 <label htmlFor="batch" className="form-label">
-                  Batch *
+                  Series *
                 </label>
                 <input
                   type="text"

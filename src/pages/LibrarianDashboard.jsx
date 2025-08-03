@@ -64,6 +64,7 @@ const LibrarianDashboard = () => {
   const [lendFormData, setLendFormData] = useState({
     borrowerName: "",
     studentId: "",
+    department: "",
     borrowDate: "",
     dueDate: "",
   });
@@ -166,6 +167,7 @@ const LibrarianDashboard = () => {
       bookTitle: "Engineering Mathematics Volume 1",
       borrowerName: "Rahim Ahmed",
       studentId: "2021-04-001",
+      department: "Civil Engineering",
       borrowDate: "2025-01-15",
       dueDate: "2025-02-15",
       status: "active",
@@ -177,6 +179,7 @@ const LibrarianDashboard = () => {
       bookTitle: "Engineering Mathematics Volume 1",
       borrowerName: "Karim Hassan",
       studentId: "2021-04-002",
+      department: "Mechanical Engineering",
       borrowDate: "2025-01-20",
       dueDate: "2025-02-20",
       status: "active",
@@ -188,6 +191,7 @@ const LibrarianDashboard = () => {
       bookTitle: "Fundamentals of Computer Programming with C#",
       borrowerName: "Fatima Rahman",
       studentId: "2021-02-015",
+      department: "Computer Science & Engineering",
       borrowDate: "2025-01-10",
       dueDate: "2025-02-10",
       status: "active",
@@ -199,6 +203,7 @@ const LibrarianDashboard = () => {
       bookTitle: "Fundamentals of Computer Programming with C#",
       borrowerName: "Nasir Khan",
       studentId: "2021-02-033",
+      department: "Computer Science & Engineering",
       borrowDate: "2025-01-12",
       dueDate: "2025-02-12",
       status: "active",
@@ -210,6 +215,7 @@ const LibrarianDashboard = () => {
       bookTitle: "Fundamentals of Computer Programming with C#",
       borrowerName: "Sadia Islam",
       studentId: "2021-02-044",
+      department: "Computer Science & Engineering",
       borrowDate: "2025-01-18",
       dueDate: "2025-02-18",
       status: "active",
@@ -397,6 +403,7 @@ const LibrarianDashboard = () => {
     setLendFormData({
       borrowerName: "",
       studentId: "",
+      department: "",
       borrowDate: today.toISOString().split("T")[0],
       dueDate: dueDate.toISOString().split("T")[0],
     });
@@ -509,7 +516,11 @@ const LibrarianDashboard = () => {
   };
 
   const handleLendSubmit = async () => {
-    if (!lendFormData.borrowerName || !lendFormData.studentId) {
+    if (
+      !lendFormData.borrowerName ||
+      !lendFormData.studentId ||
+      !lendFormData.department
+    ) {
       alert("Please fill in all required fields!");
       return;
     }
@@ -522,6 +533,7 @@ const LibrarianDashboard = () => {
         bookTitle: selectedBook.title,
         borrowerName: lendFormData.borrowerName,
         studentId: lendFormData.studentId,
+        department: lendFormData.department,
         borrowDate: lendFormData.borrowDate,
         dueDate: lendFormData.dueDate,
         status: "active",
@@ -728,6 +740,7 @@ const LibrarianDashboard = () => {
     setLendFormData({
       borrowerName: "",
       studentId: "",
+      department: "",
       borrowDate: "",
       dueDate: "",
     });
@@ -812,7 +825,9 @@ const LibrarianDashboard = () => {
       const matchesSearch =
         record.borrowerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         record.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        record.bookTitle.toLowerCase().includes(searchTerm.toLowerCase());
+        record.bookTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (record.department &&
+          record.department.toLowerCase().includes(searchTerm.toLowerCase()));
 
       let matchesStatus = true;
       if (selectedStatus === "active") {
@@ -1188,7 +1203,7 @@ const LibrarianDashboard = () => {
                 <Search size={20} className="librarian-search-icon" />
                 <input
                   type="text"
-                  placeholder="Search by borrower name, student ID, or book title..."
+                  placeholder="Search by borrower name, student ID, department, or book title..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="librarian-search-input"
@@ -1291,6 +1306,9 @@ const LibrarianDashboard = () => {
                         <div className="borrower-details">
                           <h4>{record.borrowerName}</h4>
                           <p>ID: {record.studentId}</p>
+                          {record.department && (
+                            <p>Dept: {record.department}</p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1616,6 +1634,67 @@ const LibrarianDashboard = () => {
                     />
                   </div>
                   <div className="librarian-form-group">
+                    <label htmlFor="department">Department *</label>
+                    <select
+                      id="department"
+                      value={lendFormData.department}
+                      onChange={(e) =>
+                        setLendFormData({
+                          ...lendFormData,
+                          department: e.target.value,
+                        })
+                      }
+                      required
+                    >
+                      <option value="">Select Department</option>
+                      <option value="Civil Engineering">
+                        Civil Engineering
+                      </option>
+                      <option value="Computer Science & Engineering">
+                        Computer Science & Engineering
+                      </option>
+                      <option value="Electrical & Electronic Engineering">
+                        Electrical & Electronic Engineering
+                      </option>
+                      <option value="Mechanical Engineering">
+                        Mechanical Engineering
+                      </option>
+                      <option value="Industrial & Production Engineering">
+                        Industrial & Production Engineering
+                      </option>
+                      <option value="Chemical Engineering">
+                        Chemical Engineering
+                      </option>
+                      <option value="Materials Science & Engineering">
+                        Materials Science & Engineering
+                      </option>
+                      <option value="Ceramic & Metallurgical Engineering">
+                        Ceramic & Metallurgical Engineering
+                      </option>
+                      <option value="Mechatronics Engineering">
+                        Mechatronics Engineering
+                      </option>
+                      <option value="Architecture">Architecture</option>
+                      <option value="Urban & Regional Planning">
+                        Urban & Regional Planning
+                      </option>
+                      <option value="Building Engineering & Construction Management">
+                        Building Engineering & Construction Management
+                      </option>
+                      <option value="Electrical & Computer Engineering">
+                        Electrical & Computer Engineering
+                      </option>
+                      <option value="Electronics & Telecommunication Engineering">
+                        Electronics & Telecommunication Engineering
+                      </option>
+                      <option value="Mathematics">Mathematics</option>
+                      <option value="Physics">Physics</option>
+                      <option value="Humanities">Humanities</option>
+
+                      <option value="Chemistry">Chemistry</option>
+                    </select>
+                  </div>
+                  <div className="librarian-form-group">
                     <label htmlFor="borrowDate">Borrow Date</label>
                     <input
                       type="date"
@@ -1696,6 +1775,9 @@ const LibrarianDashboard = () => {
                       <div className="borrower-info">
                         <strong>{record.borrowerName}</strong>
                         <span>ID: {record.studentId}</span>
+                        {record.department && (
+                          <span>Dept: {record.department}</span>
+                        )}
                         <small>Due: {formatDate(record.dueDate)}</small>
                         {new Date(record.dueDate) < new Date() && (
                           <span className="overdue-badge">OVERDUE</span>
@@ -1964,6 +2046,12 @@ const LibrarianDashboard = () => {
                   <strong>Student ID:</strong>
                   <span>{selectedBorrowingRecord.studentId}</span>
                 </div>
+                {selectedBorrowingRecord.department && (
+                  <div className="librarian-detail-item">
+                    <strong>Department:</strong>
+                    <span>{selectedBorrowingRecord.department}</span>
+                  </div>
+                )}
                 <div className="librarian-detail-item">
                   <strong>Borrow Date:</strong>
                   <span>{formatDate(selectedBorrowingRecord.borrowDate)}</span>

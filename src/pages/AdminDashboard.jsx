@@ -628,7 +628,7 @@ const AdminDashboard = () => {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Department</th>
-                <th>Year</th>
+                <th>Series</th>
                 <th>Status</th>
                 <th>Submitted</th>
                 <th>Actions</th>
@@ -640,7 +640,7 @@ const AdminDashboard = () => {
                   <td>{alumnus.name}</td>
                   <td>{alumnus.email}</td>
                   <td>{alumnus.department}</td>
-                  <td>{alumnus.graduationYear}</td>
+                  <td>{alumnus.batch}</td>
                   <td>
                     <span
                       className={`status-badge ${getStatusColor(
@@ -1146,6 +1146,10 @@ const AdminDashboard = () => {
               <div className="detail-group">
                 <label>Department:</label>
                 <span>{selectedAlumni.department}</span>
+              </div>
+              <div className="detail-group">
+                <label> Series:</label>
+                <span>{selectedAlumni.batch}</span>
               </div>
               <div className="detail-group">
                 <label>Graduation Year:</label>

@@ -148,7 +148,7 @@ const Alumni = () => {
 
           <div className="batch-filter">
             <label htmlFor="batch-select" className="filter-label">
-              Filter by Batch:
+              Filter by Series:
             </label>
             <select
               id="batch-select"
@@ -156,10 +156,10 @@ const Alumni = () => {
               onChange={(e) => setSelectedBatch(e.target.value)}
               className="batch-select"
             >
-              <option value="all">All Batches</option>
+              <option value="all">All Series</option>
               {availableBatches.map((batch) => (
                 <option key={batch} value={batch}>
-                  Batch {batch}
+                  {batch} Series
                 </option>
               ))}
             </select>
@@ -202,7 +202,7 @@ const Alumni = () => {
                     <div className="alumni-details">
                       <div className="alumni-detail">
                         <Calendar size={16} />
-                        <span>Batch {person.batch}</span>
+                        <span>{person.batch} Series</span>
                       </div>
                       <div className="alumni-detail">
                         <MapPin size={16} />
