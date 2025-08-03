@@ -127,6 +127,19 @@
   font-size: 0.9rem;
 }
 
+.developer-credit {
+  margin-top: 0.5rem !important;
+  color: #60a5fa !important;
+  font-size: 0.85rem !important;
+  font-weight: 500;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+.developer-credit:hover {
+  opacity: 1;
+}
+
 /* Tablet and up */
 @media (min-width: 640px) {
   .footer-content {

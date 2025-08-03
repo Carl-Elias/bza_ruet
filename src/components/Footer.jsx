@@ -70,7 +70,11 @@ const Footer = () => {
               >
                 <Facebook size={20} />
               </a>
-              <a href="mailto:bogurazillaassociation@gmail.com" className="social-link" aria-label="Email">
+              <a
+                href="mailto:bogurazillaassociation@gmail.com"
+                className="social-link"
+                aria-label="Email"
+              >
                 <Mail size={20} />
               </a>
             </div>
@@ -81,6 +85,9 @@ const Footer = () => {
           <p>
             &copy; {currentYear} Bogura Zilla Association, RUET. All rights
             reserved.
+          </p>
+          <p className="developer-credit">
+            Developed by Md Shakibul Hasan | President ~ BZA
           </p>
         </div>
       </div>
