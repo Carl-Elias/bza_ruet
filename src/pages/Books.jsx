@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   BookOpen,
@@ -6,142 +6,127 @@ import {
   Calendar,
   Download,
   Filter,
-  Star,
   ExternalLink,
+  X,
+  Mail,
+  Phone,
+  MapPin,
 } from "lucide-react";
+import { libraryService } from "./services/libraryService";
+import ContactBorrowModal from "../components/ContactBorrowModal";
 import "./Books.css";
 
 const Books = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [bookToContact, setBookToContact] = useState(null);
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [borrowingRecords, setBorrowingRecords] = useState([]);
 
-  // Mock books data
-  const books = [
-    {
-      id: 1,
-      title: "Engineering Mathematics Volume 1",
-      author: "B.S. Grewal",
-      category: "Engineering",
-      isbn: "978-8173716126",
-      publisher: "Khanna Publishers",
-      year: 2019,
-      pages: 1232,
-      status: "available",
-      borrowedBy: null,
-      dueDate: null,
-      rating: 4.5,
-      description:
-        "Comprehensive mathematics textbook for engineering students covering calculus, differential equations, and more.",
-      coverImage: null,
-      addedDate: "2024-01-15",
-      addedBy: "BZA Library Committee",
-    },
-    {
-      id: 2,
-      title: "Fundamentals of Computer Programming with C#",
-      author: "Svetlin Nakov",
-      category: "Computer Science",
-      isbn: "978-9544007737",
-      publisher: "Faber Publishing",
-      year: 2018,
-      pages: 1132,
-      status: "borrowed",
-      borrowedBy: "Md. Rahman Ahmed",
-      dueDate: "2025-02-15",
-      rating: 4.3,
-      description:
-        "Complete guide to programming fundamentals using C# programming language.",
-      coverImage: null,
-      addedDate: "2024-02-20",
-      addedBy: "CSE Department",
-    },
-    {
-      id: 3,
-      title: "Strength of Materials",
-      author: "R.K. Bansal",
-      category: "Civil Engineering",
-      isbn: "978-8131808825",
-      publisher: "Laxmi Publications",
-      year: 2020,
-      pages: 864,
-      status: "available",
-      borrowedBy: null,
-      dueDate: null,
-      rating: 4.7,
-      description:
-        "Comprehensive study of mechanics of materials for civil engineering students.",
-      coverImage: null,
-      addedDate: "2024-03-10",
-      addedBy: "Civil Engineering Department",
-    },
-    {
-      id: 4,
-      title: "Digital Signal Processing",
-      author: "John G. Proakis",
-      category: "Electrical Engineering",
-      isbn: "978-0131873742",
-      publisher: "Pearson",
-      year: 2021,
-      pages: 1024,
-      status: "available",
-      borrowedBy: null,
-      dueDate: null,
-      rating: 4.4,
-      description:
-        "Advanced concepts in digital signal processing with practical applications.",
-      coverImage: null,
-      addedDate: "2024-04-05",
-      addedBy: "EEE Department",
-    },
-    {
-      id: 5,
-      title: "Manufacturing Processes",
-      author: "Kalpakjian & Schmid",
-      category: "Mechanical Engineering",
-      isbn: "978-0134290553",
-      publisher: "Pearson",
-      year: 2019,
-      pages: 1248,
-      status: "borrowed",
-      borrowedBy: "Fatima Khatun",
-      dueDate: "2025-02-20",
-      rating: 4.6,
-      description:
-        "Comprehensive coverage of manufacturing processes and materials technology.",
-      coverImage: null,
-      addedDate: "2024-05-12",
-      addedBy: "ME Department",
-    },
-    {
-      id: 6,
-      title: "Bangla Sahityer Itihas",
-      author: "Dr. Muhammad Shahidullah",
-      category: "Literature",
-      isbn: "978-9844120234",
-      publisher: "Bangla Academy",
-      year: 2018,
-      pages: 456,
-      status: "available",
-      borrowedBy: null,
-      dueDate: null,
-      rating: 4.8,
-      description:
-        "History of Bengali literature by renowned scholar Dr. Muhammad Shahidullah.",
-      coverImage: null,
-      addedDate: "2024-06-01",
-      addedBy: "BZA Cultural Committee",
-    },
-  ];
+  // Load books and borrowing records from Firebase
+  useEffect(() => {
+    let booksUnsubscribe;
+    let borrowingRecordsUnsubscribe;
 
+    const setupRealtimeListeners = async () => {
+      try {
+        // Subscribe to books
+        booksUnsubscribe = libraryService.books.subscribeToBooks(
+          (booksData) => {
+            setBooks(booksData);
+            setLoading(false);
+          }
+        );
+
+        // Subscribe to borrowing records to get current status
+        borrowingRecordsUnsubscribe =
+          libraryService.borrowingRecords.subscribeToBorrowingRecords(
+            (recordsData) => {
+              setBorrowingRecords(recordsData);
+            }
+          );
+      } catch (error) {
+        console.error("Error setting up Firebase listeners:", error);
+        setLoading(false);
+
+        // Fallback to initial load if real-time fails
+        loadInitialData();
+      }
+    };
+
+    const loadInitialData = async () => {
+      try {
+        // Load books
+        const booksResponse = await libraryService.books.getAllBooks();
+        if (booksResponse.success) {
+          setBooks(booksResponse.data);
+        }
+
+        // Load borrowing records
+        const recordsResponse =
+          await libraryService.borrowingRecords.getAllBorrowingRecords();
+        if (recordsResponse.success) {
+          setBorrowingRecords(recordsResponse.data);
+        }
+      } catch (error) {
+        console.error("Error loading initial data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    setupRealtimeListeners();
+
+    // Cleanup function
+    return () => {
+      if (booksUnsubscribe) {
+        booksUnsubscribe();
+      }
+      if (borrowingRecordsUnsubscribe) {
+        borrowingRecordsUnsubscribe();
+      }
+    };
+  }, []);
+
+  // Process books with current borrowing status
+  const processedBooks = books.map((book) => {
+    // Find active borrowing records for this book
+    const activeBorrowings = borrowingRecords.filter(
+      (record) => record.bookId === book.id && record.status === "active"
+    );
+
+    // Determine availability based on inventory and active borrowings
+    const hasAvailableCopies = book.inventory && book.inventory.available > 0;
+    const hasBorrowedCopies = book.inventory && book.inventory.borrowed > 0;
+
+    // A book is considered "borrowed" if it has any borrowed copies
+    // A book is considered "available" if it has available copies (even if some are borrowed)
+    const status = hasBorrowedCopies ? "borrowed" : "available";
+
+    // Get borrowing information if book is borrowed
+    const currentBorrowing = activeBorrowings[0]; // Get first active borrowing
+
+    return {
+      ...book,
+      status: status,
+      borrowedBy: currentBorrowing?.borrowerName || null,
+      dueDate: currentBorrowing?.dueDate || null,
+      activeBorrowingsCount: activeBorrowings.length,
+      hasAvailableCopies: hasAvailableCopies,
+    };
+  });
+
+  // Generate categories dynamically from books
   const categories = [
     { value: "all", label: "All Categories" },
-    { value: "Engineering", label: "Engineering" },
-    { value: "Computer Science", label: "Computer Science" },
-    { value: "Civil Engineering", label: "Civil Engineering" },
-    { value: "Electrical Engineering", label: "Electrical Engineering" },
-    { value: "Mechanical Engineering", label: "Mechanical Engineering" },
-    { value: "Literature", label: "Literature" },
+    ...Array.from(new Set(books.map((book) => book.category)))
+      .filter(Boolean)
+      .map((category) => ({ value: category, label: category })),
   ];
 
   const statusOptions = [
@@ -150,23 +135,54 @@ const Books = () => {
     { value: "borrowed", label: "Borrowed" },
   ];
 
-  const filteredBooks = books.filter((book) => {
+  const filteredBooks = processedBooks.filter((book) => {
     const matchesSearch =
       book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
       book.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
       selectedCategory === "all" || book.category === selectedCategory;
-    const matchesStatus =
-      selectedStatus === "all" || book.status === selectedStatus;
+
+    // Updated status filtering logic
+    let matchesStatus = true;
+    if (selectedStatus === "available") {
+      // Show books that have available copies (even if some are borrowed)
+      matchesStatus = book.hasAvailableCopies;
+    } else if (selectedStatus === "borrowed") {
+      // Show books that have any borrowed copies
+      matchesStatus = book.inventory && book.inventory.borrowed > 0;
+    }
+    // "all" shows everything, so matchesStatus remains true
+
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
+  // Calculate dynamic library stats
   const libraryStats = [
-    { label: "Total Books", value: "500+", icon: BookOpen },
-    { label: "Active Members", value: "150+", icon: User },
-    { label: "Books Borrowed", value: "200+", icon: Download },
-    { label: "Categories", value: "25+", icon: Filter },
+    {
+      label: "Total Books",
+      value: books.length.toString(),
+      icon: BookOpen,
+    },
+    {
+      label: "Total Copies",
+      value: books
+        .reduce((sum, book) => sum + (book.inventory?.total || 0), 0)
+        .toString(),
+      icon: BookOpen,
+    },
+    {
+      label: "Available Copies",
+      value: books
+        .reduce((sum, book) => sum + (book.inventory?.available || 0), 0)
+        .toString(),
+      icon: Download,
+    },
+    {
+      label: "Categories",
+      value: new Set(books.map((book) => book.category)).size.toString(),
+      icon: Filter,
+    },
   ];
 
   const formatDate = (dateString) => {
@@ -178,25 +194,24 @@ const Books = () => {
     });
   };
 
-  const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
+  const openDetailsModal = (book) => {
+    setSelectedBook(book);
+    setShowDetailsModal(true);
+  };
 
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={i} size={14} className="star filled" />);
-    }
+  const closeDetailsModal = () => {
+    setShowDetailsModal(false);
+    setSelectedBook(null);
+  };
 
-    if (hasHalfStar) {
-      stars.push(<Star key="half" size={14} className="star half" />);
-    }
+  const openBorrowingModal = (book) => {
+    setBookToContact(book);
+    setShowContactModal(true);
+  };
 
-    const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(<Star key={`empty-${i}`} size={14} className="star" />);
-    }
-
-    return stars;
+  const closeBorrowingModal = () => {
+    setShowContactModal(false);
+    setBookToContact(null);
   };
 
   const BookCard = ({ book }) => (
@@ -204,17 +219,17 @@ const Books = () => {
       <div className="book-cover">
         <BookOpen size={40} className="book-icon" />
         <div className="book-status-badge">
-          {book.status === "available" ? "Available" : "Borrowed"}
+          {book.inventory?.available > 0
+            ? `${book.inventory.available} Available`
+            : book.inventory?.borrowed > 0
+            ? `${book.inventory.borrowed} Borrowed`
+            : "No Copies"}
         </div>
       </div>
 
       <div className="book-content">
         <div className="book-header">
           <h3 className="book-title">{book.title}</h3>
-          <div className="book-rating">
-            {renderStars(book.rating)}
-            <span className="rating-text">({book.rating})</span>
-          </div>
         </div>
 
         <div className="book-meta">
@@ -236,35 +251,34 @@ const Books = () => {
 
         <div className="book-details">
           <div className="book-detail">
-            <strong>ISBN:</strong> {book.isbn}
-          </div>
-          <div className="book-detail">
             <strong>Publisher:</strong> {book.publisher}
           </div>
-          <div className="book-detail">
-            <strong>Pages:</strong> {book.pages}
-          </div>
-          {book.status === "borrowed" && (
-            <div className="book-detail borrowed-info">
-              <strong>Borrowed by:</strong> {book.borrowedBy}
-              <br />
-              <strong>Due Date:</strong> {formatDate(book.dueDate)}
+          {book.inventory && (
+            <div className="book-detail inventory-info">
+              <strong>Inventory:</strong> {book.inventory.available} available
+              of {book.inventory.total} total
             </div>
           )}
         </div>
 
         <div className="book-actions">
-          {book.status === "available" ? (
-            <button className="btn btn-primary">
+          {book.hasAvailableCopies ? (
+            <button
+              className="btn btn-primary"
+              onClick={() => openBorrowingModal(book)}
+            >
               <Download size={16} />
-              Borrow Book
+              Contact Librarian
             </button>
           ) : (
             <button className="btn btn-secondary" disabled>
-              Currently Borrowed
+              All Copies Borrowed
             </button>
           )}
-          <button className="btn btn-outline">
+          <button
+            className="btn btn-outline"
+            onClick={() => openDetailsModal(book)}
+          >
             <ExternalLink size={16} />
             Details
           </button>
@@ -347,7 +361,13 @@ const Books = () => {
       {/* Books Grid */}
       <section className="books-grid-section">
         <div className="books-container">
-          {filteredBooks.length > 0 ? (
+          {loading ? (
+            <div className="loading-state">
+              <BookOpen size={64} className="loading-icon" />
+              <h3>Loading books...</h3>
+              <p>Please wait while we fetch the latest collection.</p>
+            </div>
+          ) : filteredBooks.length > 0 ? (
             <div className="books-grid">
               {filteredBooks.map((book) => (
                 <BookCard key={book.id} book={book} />
@@ -421,6 +441,183 @@ const Books = () => {
           </div>
         </div>
       </section>
+
+      {/* Book Details Modal */}
+      {showDetailsModal && selectedBook && (
+        <div className="modal-overlay" onClick={closeDetailsModal}>
+          <div className="book-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Book Details</h2>
+              <button onClick={closeDetailsModal} className="close-btn">
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="modal-content">
+              <div className="book-profile">
+                <div className="book-cover-large">
+                  <BookOpen size={80} className="book-icon-large" />
+                </div>
+
+                <div className="book-info-main">
+                  <h3 className="book-title-large">{selectedBook.title}</h3>
+                  <p className="book-author-large">by {selectedBook.author}</p>
+                </div>
+              </div>
+
+              <div className="book-details-grid">
+                <div className="detail-item">
+                  <div className="detail-icon">
+                    <Filter size={20} />
+                  </div>
+                  <div className="detail-content">
+                    <span className="detail-label">Category</span>
+                    <span className="detail-value">
+                      {selectedBook.category}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="detail-item">
+                  <div className="detail-icon">
+                    <User size={20} />
+                  </div>
+                  <div className="detail-content">
+                    <span className="detail-label">Publisher</span>
+                    <span className="detail-value">
+                      {selectedBook.publisher}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="detail-item">
+                  <div className="detail-icon">
+                    <Calendar size={20} />
+                  </div>
+                  <div className="detail-content">
+                    <span className="detail-label">Publication Year</span>
+                    <span className="detail-value">{selectedBook.year}</span>
+                  </div>
+                </div>
+
+                <div className="detail-item">
+                  <div className="detail-icon">
+                    <Download size={20} />
+                  </div>
+                  <div className="detail-content">
+                    <span className="detail-label">Availability</span>
+                    <span
+                      className={`detail-value status-${selectedBook.status}`}
+                    >
+                      {selectedBook.inventory
+                        ? `${selectedBook.inventory.available} of ${selectedBook.inventory.total} available`
+                        : selectedBook.status === "available"
+                        ? "Available"
+                        : "Borrowed"}
+                    </span>
+                  </div>
+                </div>
+
+                {selectedBook.inventory && (
+                  <div className="detail-item">
+                    <div className="detail-icon">
+                      <BookOpen size={20} />
+                    </div>
+                    <div className="detail-content">
+                      <span className="detail-label">Total Copies</span>
+                      <span className="detail-value">
+                        {selectedBook.inventory.total}
+                        {selectedBook.inventory.borrowed > 0 &&
+                          ` (${selectedBook.inventory.borrowed} borrowed)`}
+                        {selectedBook.inventory.damaged > 0 &&
+                          ` (${selectedBook.inventory.damaged} damaged)`}
+                        {selectedBook.inventory.lost > 0 &&
+                          ` (${selectedBook.inventory.lost} lost)`}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {selectedBook.status === "borrowed" &&
+                  selectedBook.activeBorrowingsCount > 0 && (
+                    <div className="detail-item">
+                      <div className="detail-icon">
+                        <User size={20} />
+                      </div>
+                      <div className="detail-content">
+                        <span className="detail-label">Active Borrowings</span>
+                        <span className="detail-value">
+                          {selectedBook.activeBorrowingsCount} borrower(s)
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                <div className="detail-item">
+                  <div className="detail-icon">
+                    <Calendar size={20} />
+                  </div>
+                  <div className="detail-content">
+                    <span className="detail-label">Added Date</span>
+                    <span className="detail-value">
+                      {formatDate(selectedBook.addedDate)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="detail-item">
+                  <div className="detail-icon">
+                    <User size={20} />
+                  </div>
+                  <div className="detail-content">
+                    <span className="detail-label">Added By</span>
+                    <span className="detail-value">{selectedBook.addedBy}</span>
+                  </div>
+                </div>
+              </div>
+
+              {selectedBook.description && (
+                <div className="description-section">
+                  <h4>Description</h4>
+                  <p>{selectedBook.description}</p>
+                </div>
+              )}
+
+              <div className="modal-actions">
+                {selectedBook.inventory?.available > 0 ? (
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => {
+                      closeDetailsModal();
+                      openBorrowingModal(selectedBook);
+                    }}
+                  >
+                    <Download size={16} />
+                    Contact for Borrowing ({
+                      selectedBook.inventory.available
+                    }{" "}
+                    available)
+                  </button>
+                ) : (
+                  <button className="btn btn-secondary" disabled>
+                    All Copies Currently Borrowed
+                  </button>
+                )}
+                <a href="/contact" className="btn btn-outline">
+                  Contact Librarian
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Contact Librarian Modal */}
+      <ContactBorrowModal
+        book={bookToContact}
+        isOpen={showContactModal}
+        onClose={closeBorrowingModal}
+      />
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Bell, Calendar, Pin, AlertCircle } from "lucide-react";
-import { announcementsService } from "../services/firebase";
+import { announcementsService } from "./services/firebase";
 import "./Announcements.css";
 
 const Announcements = () => {

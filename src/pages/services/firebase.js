@@ -12,7 +12,7 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 // Removed Firebase Storage imports since we'll work without it
-import { db } from "../config/firebase";
+import { db } from "../../config/firebase";
 
 // Alumni registration service
 export const alumniService = {

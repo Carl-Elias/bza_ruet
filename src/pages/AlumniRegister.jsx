@@ -17,7 +17,7 @@ import {
   CheckCircle,
   Loader,
 } from "lucide-react";
-import { alumniService } from "../services/firebase";
+import { alumniService } from "./services/firebase";
 import "./AlumniRegister.css";
 
 const AlumniRegister = () => {

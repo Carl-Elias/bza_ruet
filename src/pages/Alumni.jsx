@@ -16,7 +16,7 @@ import {
   Globe,
   Building,
 } from "lucide-react";
-import { alumniService } from "../services/firebase";
+import { alumniService } from "./services/firebase";
 import "./Alumni.css";
 
 const Alumni = () => {

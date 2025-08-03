@@ -6,6 +6,7 @@ import About from "./pages/About";
 import Alumni from "./pages/Alumni";
 import AlumniRegister from "./pages/AlumniRegister";
 import AdminDashboard from "./pages/AdminDashboard";
+import LibrarianDashboard from "./pages/LibrarianDashboard";
 import Events from "./pages/Events";
 import Announcements from "./pages/Announcements";
 import Books from "./pages/Books";
@@ -24,6 +25,7 @@ function App() {
             <Route path="/alumni" element={<Alumni />} />
             <Route path="/alumni/register" element={<AlumniRegister />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/librarian" element={<LibrarianDashboard />} />
             <Route path="/events" element={<Events />} />
             <Route path="/announcements" element={<Announcements />} />
             <Route path="/books" element={<Books />} />

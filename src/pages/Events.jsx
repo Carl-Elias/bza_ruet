@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Calendar, MapPin, Clock, Users, Filter, Search } from "lucide-react";
-import { eventsService } from "../services/firebase";
+import { eventsService } from "./services/firebase";
 import "./Events.css";
 
 const Events = () => {

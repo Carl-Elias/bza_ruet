@@ -18,6 +18,7 @@ import {
   BarChart3,
   Save,
   X,
+  LogOut,
 } from "lucide-react";
 import {
   alumniService,
@@ -25,9 +26,14 @@ import {
   eventsService,
   announcementsService,
 } from "../services/firebase";
+import AdminAuth, {
+  checkAdminAuth,
+  logoutAdmin,
+} from "../components/AdminAuth";
 import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [alumni, setAlumni] = useState([]);
   const [stats, setStats] = useState({
@@ -36,7 +42,7 @@ const AdminDashboard = () => {
     approved: 0,
     rejected: 0,
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAlumni, setSelectedAlumni] = useState(null);
@@ -69,18 +75,61 @@ const AdminDashboard = () => {
   });
 
   useEffect(() => {
-    loadData();
-    loadEvents();
-    loadAnnouncements();
-  }, [selectedStatus]);
+    console.log("Checking admin authentication...");
+    const authStatus = checkAdminAuth();
+    console.log("Auth status:", authStatus);
+    setIsAuthenticated(authStatus);
+
+    // If authenticated, start loading data
+    if (authStatus) {
+      setLoading(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Only load data if authenticated
+    if (!isAuthenticated) return;
+
+    console.log("Admin dashboard authenticated, loading data...");
+
+    // Add timeout to prevent infinite loading
+    const loadDataWithTimeout = async () => {
+      const timeoutId = setTimeout(() => {
+        console.warn("Data loading timed out, setting loading to false");
+        setLoading(false);
+      }, 10000); // 10 second timeout
+
+      try {
+        await Promise.all([loadData(), loadEvents(), loadAnnouncements()]);
+      } catch (error) {
+        console.error("Error in parallel data loading:", error);
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    };
+
+    loadDataWithTimeout();
+  }, [selectedStatus, isAuthenticated]);
 
   const loadData = async () => {
     setLoading(true);
     try {
+      console.log("Loading admin dashboard data...");
+
       // Load stats
       const statsResult = await statsService.getAlumniStats();
       if (statsResult.success) {
+        console.log("Stats loaded:", statsResult.data);
         setStats(statsResult.data);
+      } else {
+        console.error("Failed to load stats:", statsResult.error);
+        // Set default stats if failed
+        setStats({
+          total: 0,
+          pending: 0,
+          approved: 0,
+          rejected: 0,
+        });
       }
 
       // Load alumni based on status filter
@@ -92,11 +141,24 @@ const AdminDashboard = () => {
       }
 
       if (alumniResult.success) {
-        setAlumni(alumniResult.data);
+        console.log("Alumni loaded:", alumniResult.data);
+        setAlumni(alumniResult.data || []);
+      } else {
+        console.error("Failed to load alumni:", alumniResult.error);
+        setAlumni([]);
       }
     } catch (error) {
       console.error("Error loading data:", error);
+      // Set default values on error
+      setStats({
+        total: 0,
+        pending: 0,
+        approved: 0,
+        rejected: 0,
+      });
+      setAlumni([]);
     } finally {
+      console.log("Data loading complete");
       setLoading(false);
     }
   };
@@ -108,7 +170,7 @@ const AdminDashboard = () => {
 
       if (result.success) {
         console.log("Events loaded successfully:", result.data);
-        setEvents(result.data);
+        setEvents(result.data || []);
       } else {
         console.error("Failed to load events:", result.error);
         // Set empty array if no events or error
@@ -127,7 +189,7 @@ const AdminDashboard = () => {
 
       if (result.success) {
         console.log("Announcements loaded successfully:", result.data);
-        setAnnouncements(result.data);
+        setAnnouncements(result.data || []);
       } else {
         console.error("Failed to load announcements:", result.error);
         // Set empty array if no announcements or error
@@ -314,6 +376,20 @@ const AdminDashboard = () => {
     }
   };
 
+  // Show authentication screen if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <AdminAuth
+        onAuthenticated={(authStatus) => {
+          setIsAuthenticated(authStatus);
+          if (authStatus) {
+            setLoading(true);
+          }
+        }}
+      />
+    );
+  }
+
   if (loading) {
     return (
       <div className="admin-dashboard">
@@ -327,58 +403,94 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
-      <div className="dashboard-header">
-        <h1>BZA Admin Dashboard</h1>
-        <button onClick={loadData} className="refresh-btn">
-          <RefreshCw size={18} />
-          Refresh
-        </button>
-      </div>
+      <div className="admin-dashboard-container">
+        <div className="admin-dashboard-header">
+          <h1>BZA Admin Dashboard</h1>
+          <div
+            className="header-actions"
+            style={{
+              display: "flex !important",
+              gap: "1rem",
+              alignItems: "center",
+            }}
+          >
+            <button onClick={loadData} className="refresh-btn">
+              <RefreshCw size={18} />
+              Refresh
+            </button>
+            <button
+              onClick={() => {
+                console.log("Logout button clicked");
+                logoutAdmin();
+              }}
+              className="logout-btn"
+              style={{
+                display: "flex !important",
+                alignItems: "center",
+                gap: "8px",
+                backgroundColor: "#dc2626",
+                color: "white",
+                padding: "0.75rem 1.5rem",
+                border: "none",
+                borderRadius: "10px",
+                cursor: "pointer",
+                fontWeight: "600",
+                minWidth: "120px",
+              }}
+            >
+              <LogOut size={18} />
+              Logout
+            </button>
+          </div>
+        </div>
 
-      {/* Navigation Tabs */}
-      <div className="admin-nav-tabs">
-        <button
-          className={`nav-tab ${activeTab === "overview" ? "active" : ""}`}
-          onClick={() => setActiveTab("overview")}
-        >
-          <BarChart3 size={18} />
-          Overview
-        </button>
-        <button
-          className={`nav-tab ${activeTab === "alumni" ? "active" : ""}`}
-          onClick={() => setActiveTab("alumni")}
-        >
-          <Users size={18} />
-          Alumni Management
-        </button>
-        <button
-          className={`nav-tab ${activeTab === "events" ? "active" : ""}`}
-          onClick={() => setActiveTab("events")}
-        >
-          <Calendar size={18} />
-          Events
-        </button>
-        <button
-          className={`nav-tab ${activeTab === "announcements" ? "active" : ""}`}
-          onClick={() => setActiveTab("announcements")}
-        >
-          <Megaphone size={18} />
-          Announcements
-        </button>
-      </div>
+        {/* Navigation Tabs */}
+        <div className="admin-nav-tabs">
+          <button
+            className={`nav-tab ${activeTab === "overview" ? "active" : ""}`}
+            onClick={() => setActiveTab("overview")}
+          >
+            <BarChart3 size={18} />
+            Overview
+          </button>
+          <button
+            className={`nav-tab ${activeTab === "alumni" ? "active" : ""}`}
+            onClick={() => setActiveTab("alumni")}
+          >
+            <Users size={18} />
+            Alumni Management
+          </button>
+          <button
+            className={`nav-tab ${activeTab === "events" ? "active" : ""}`}
+            onClick={() => setActiveTab("events")}
+          >
+            <Calendar size={18} />
+            Events
+          </button>
+          <button
+            className={`nav-tab ${
+              activeTab === "announcements" ? "active" : ""
+            }`}
+            onClick={() => setActiveTab("announcements")}
+          >
+            <Megaphone size={18} />
+            Announcements
+          </button>
+        </div>
 
-      {/* Tab Content */}
-      <div className="tab-content">
-        {activeTab === "overview" && renderOverviewTab()}
-        {activeTab === "alumni" && renderAlumniTab()}
-        {activeTab === "events" && renderEventsTab()}
-        {activeTab === "announcements" && renderAnnouncementsTab()}
-      </div>
+        {/* Tab Content */}
+        <div className="tab-content">
+          {activeTab === "overview" && renderOverviewTab()}
+          {activeTab === "alumni" && renderAlumniTab()}
+          {activeTab === "events" && renderEventsTab()}
+          {activeTab === "announcements" && renderAnnouncementsTab()}
+        </div>
 
-      {/* Modals */}
-      {showModal && renderAlumniModal()}
-      {showEventForm && renderEventForm()}
-      {showAnnouncementForm && renderAnnouncementForm()}
+        {/* Modals */}
+        {showModal && renderAlumniModal()}
+        {showEventForm && renderEventForm()}
+        {showAnnouncementForm && renderAnnouncementForm()}
+      </div>
     </div>
   );
 

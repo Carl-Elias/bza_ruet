@@ -19,7 +19,7 @@ import {
   Save,
   X,
 } from "lucide-react";
-import { alumniService, statsService } from "../services/firebase";
+import { alumniService, statsService } from "./services/firebase";
 import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
