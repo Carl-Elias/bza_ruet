@@ -208,10 +208,6 @@ const Alumni = () => {
                         <MapPin size={16} />
                         <span>{person.workLocation || person.location}</span>
                       </div>
-                      <div className="alumni-detail">
-                        <GraduationCap size={16} />
-                        <span>Graduated {person.graduationYear}</span>
-                      </div>
                     </div>
 
                     <div className="alumni-actions">
@@ -318,18 +314,6 @@ const Alumni = () => {
                     <span className="detail-label">Batch</span>
                     <span className="detail-value">
                       Batch {selectedAlumni.batch}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="detail-item">
-                  <div className="detail-icon">
-                    <Calendar size={20} />
-                  </div>
-                  <div className="detail-content">
-                    <span className="detail-label">Graduation Year</span>
-                    <span className="detail-value">
-                      {selectedAlumni.graduationYear}
                     </span>
                   </div>
                 </div>

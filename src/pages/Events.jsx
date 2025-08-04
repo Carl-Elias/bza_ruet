@@ -139,7 +139,25 @@ const Events = () => {
 
           {(event.status === "upcoming" || event.status === "ongoing") && (
             <div className="event-actions">
-              <button className="btn btn-primary">Register</button>
+              {event.registrationLink ? (
+                <a
+                  href={event.registrationLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary"
+                  style={{ textDecoration: "none" }}
+                >
+                  Register
+                </a>
+              ) : (
+                <button
+                  className="btn btn-primary"
+                  disabled
+                  title="Registration link not available"
+                >
+                  Register
+                </button>
+              )}
               <button className="btn btn-secondary">Learn More</button>
             </div>
           )}

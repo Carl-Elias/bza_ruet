@@ -36,7 +36,6 @@ const AlumniRegister = () => {
     // Academic Details
     batch: "",
     department: "",
-    graduationYear: "",
     studentId: "",
 
     // Professional Information
@@ -146,7 +145,7 @@ const AlumniRegister = () => {
         // Redirect to alumni page after 2 seconds
         setTimeout(() => {
           navigate("/alumni");
-        }, 2000);
+        }, 5000);
       } else {
         throw new Error(result.error || "Registration failed");
       }
@@ -165,7 +164,8 @@ const AlumniRegister = () => {
           <div className="success-content">
             <CheckCircle size={64} className="success-icon" />
             <h1>Registration Successful!</h1>
-            <p>Welcome to the BZA RUET Alumni Network!</p>
+
+            <p>Welcome to the BZA RUET Alumni Network! Your Profile will be added to alumni page after approval.</p>
             <p>You will be redirected to the alumni directory shortly...</p>
             <Link to="/alumni" className="btn btn-primary">
               View Alumni Directory
@@ -341,25 +341,6 @@ const AlumniRegister = () => {
                     </option>
                   ))}
                 </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="graduationYear" className="form-label">
-                  Graduation Year *
-                </label>
-                <div className="input-with-icon">
-                  <Calendar size={20} className="input-icon" />
-                  <input
-                    type="text"
-                    id="graduationYear"
-                    name="graduationYear"
-                    value={formData.graduationYear}
-                    onChange={handleInputChange}
-                    className="form-input"
-                    required
-                    placeholder="e.g., 2022"
-                  />
-                </div>
               </div>
 
               <div className="form-group">

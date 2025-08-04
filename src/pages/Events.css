@@ -246,6 +246,19 @@
   transform: translateY(-2px);
 }
 
+.btn-primary:disabled {
+  background: #9ca3af;
+  color: #6b7280;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.6;
+}
+
+.btn-primary:disabled:hover {
+  background: #9ca3af;
+  transform: none;
+}
+
 .btn-secondary {
   background: transparent;
   color: #3b82f6;

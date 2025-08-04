@@ -58,6 +58,7 @@ const AdminDashboard = () => {
     date: "",
     time: "",
     location: "",
+    registrationLink: "",
     category: "general",
     status: "upcoming",
   });
@@ -280,6 +281,7 @@ const AdminDashboard = () => {
         date: "",
         time: "",
         location: "",
+        registrationLink: "",
         category: "general",
         status: "upcoming",
       });
@@ -742,7 +744,45 @@ const AdminDashboard = () => {
                 <span className="event-date">📅 {event.date}</span>
                 <span className="event-time">🕐 {event.time}</span>
                 <span className="event-location">📍 {event.location}</span>
+                {event.registrationLink && (
+                  <span className="event-registration">
+                    🔗{" "}
+                    <a
+                      href={event.registrationLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "#3b82f6", textDecoration: "none" }}
+                    >
+                      Registration Available
+                    </a>
+                  </span>
+                )}
               </div>
+              {event.registrationLink && (
+                <div style={{ marginTop: "1rem" }}>
+                  <a
+                    href={event.registrationLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="register-btn"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      padding: "0.5rem 1rem",
+                      backgroundColor: "#10b981",
+                      color: "white",
+                      textDecoration: "none",
+                      borderRadius: "0.5rem",
+                      fontSize: "0.875rem",
+                      fontWeight: "500",
+                      transition: "background-color 0.2s",
+                    }}
+                  >
+                    📝 Register Now
+                  </a>
+                </div>
+              )}
               <div className="event-meta">
                 <span className={`event-category ${event.category}`}>
                   {event.category}
@@ -865,6 +905,7 @@ const AdminDashboard = () => {
                   date: "",
                   time: "",
                   location: "",
+                  registrationLink: "",
                   category: "general",
                   status: "upcoming",
                 });
@@ -935,6 +976,32 @@ const AdminDashboard = () => {
                 }
                 required
               />
+            </div>
+
+            <div className="form-group">
+              <label>Registration Link</label>
+              <input
+                type="url"
+                value={eventForm.registrationLink}
+                onChange={(e) =>
+                  setEventForm({
+                    ...eventForm,
+                    registrationLink: e.target.value,
+                  })
+                }
+                placeholder="https://example.com/register or mailto:register@email.com"
+              />
+              <small
+                style={{
+                  color: "#6b7280",
+                  fontSize: "0.875rem",
+                  marginTop: "0.25rem",
+                  display: "block",
+                }}
+              >
+                Optional: Add a registration link (URL) or email (mailto:) for
+                attendees to register
+              </small>
             </div>
 
             <div className="form-row">
